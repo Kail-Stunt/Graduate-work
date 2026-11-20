@@ -4,14 +4,10 @@ spring:
     name: diplom
 
   datasource:
-    url: jdbc:h2:file:./data/diplomdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: false
+    url: jdbc:postgresql://localhost:5432/Graduate
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: Password12
 
   jpa:
     hibernate:
@@ -20,7 +16,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   servlet:
     multipart:

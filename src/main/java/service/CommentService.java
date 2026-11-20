@@ -1,4 +1,3 @@
-
 package service;
 
 import org.springframework.stereotype.Service;
@@ -8,11 +7,11 @@ import dto.response.CommentsResponse;
 import entity.Ad;
 import entity.Comment;
 import entity.User;
+import mapper.CommentMapper;
 import repository.AdRepository;
 import repository.CommentRepository;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -20,10 +19,12 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final AdRepository adRepository;
+    private final CommentMapper commentMapper;
 
-    public CommentService(CommentRepository commentRepository, AdRepository adRepository) {
+    public CommentService(CommentRepository commentRepository, AdRepository adRepository, CommentMapper commentMapper) {
         this.commentRepository = commentRepository;
         this.adRepository = adRepository;
+        this.commentMapper = commentMapper;
     }
 
     public CommentsResponse getComments(Integer adId) {
@@ -32,7 +33,7 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findByAd(ad);
         List<CommentResponse> commentResponses = comments.stream()
-                .map(this::toResponse)
+                .map(commentMapper::toResponse)
                 .toList();
 
         CommentsResponse response = new CommentsResponse();
@@ -52,7 +53,7 @@ public class CommentService {
         comment.setCreatedAt(LocalDateTime.now());
 
         Comment saved = commentRepository.save(comment);
-        return toResponse(saved);
+        return commentMapper.toResponse(saved);
     }
 
     public void deleteComment(Integer adId, Integer commentId, User author) {
@@ -87,17 +88,6 @@ public class CommentService {
         }
 
         Comment saved = commentRepository.save(comment);
-        return toResponse(saved);
-    }
-
-    private CommentResponse toResponse(Comment comment) {
-        CommentResponse response = new CommentResponse();
-        response.setPk(comment.getPk());
-        response.setAuthor(comment.getAuthor().getId());
-        response.setAuthorImage(comment.getAuthor().getImage());
-        response.setAuthorFirstName(comment.getAuthor().getFirstName());
-        response.setCreatedAt(comment.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli());
-        response.setText(comment.getText());
-        return response;
+        return commentMapper.toResponse(saved);
     }
 }

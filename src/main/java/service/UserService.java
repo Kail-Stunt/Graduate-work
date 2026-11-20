@@ -1,4 +1,3 @@
-
 package service;
 
 import org.springframework.security.core.Authentication;
@@ -11,6 +10,7 @@ import dto.request.UpdateUserRequest;
 import dto.response.UserResponse;
 import entity.User;
 import entity.UserRole;
+import mapper.UserMapper;
 import repository.UserRepository;
 
 import java.util.Optional;
@@ -20,10 +20,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -44,12 +46,12 @@ public class UserService {
         }
 
         User saved = userRepository.save(user);
-        return toResponse(saved);
+        return userMapper.toResponse(saved);
     }
 
     public UserResponse getUser() {
         User currentUser = getCurrentUser();
-        return toResponse(currentUser);
+        return userMapper.toResponse(currentUser);
     }
 
     public UserResponse updateUser(UpdateUserRequest request) {
@@ -66,7 +68,7 @@ public class UserService {
         }
 
         User saved = userRepository.save(currentUser);
-        return toResponse(saved);
+        return userMapper.toResponse(saved);
     }
 
     public void updateUserImage(String imagePath) {
@@ -98,14 +100,6 @@ public class UserService {
     }
 
     public UserResponse toResponse(User user) {
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getUsername());
-        response.setFirstName(user.getFirstName());
-        response.setLastName(user.getLastName());
-        response.setPhone(user.getPhone());
-        response.setRole(user.getRole().name());
-        response.setImage(user.getImage());
-        return response;
+        return userMapper.toResponse(user);
     }
 }
