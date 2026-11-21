@@ -1,5 +1,6 @@
 package service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import dto.request.CreateOrUpdateCommentRequest;
 import dto.response.CommentResponse;
@@ -27,6 +28,7 @@ public class CommentService {
         this.commentMapper = commentMapper;
     }
 
+    @PreAuthorize("permitAll()")
     public CommentsResponse getComments(Integer adId) {
         Ad ad = adRepository.findById(adId)
                 .orElseThrow(() -> new RuntimeException("Ad not found"));
@@ -42,6 +44,7 @@ public class CommentService {
         return response;
     }
 
+    @PreAuthorize("isAuthenticated()")
     public CommentResponse addComment(Integer adId, CreateOrUpdateCommentRequest request, User author) {
         Ad ad = adRepository.findById(adId)
                 .orElseThrow(() -> new RuntimeException("Ad not found"));
@@ -56,6 +59,7 @@ public class CommentService {
         return commentMapper.toResponse(saved);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public void deleteComment(Integer adId, Integer commentId, User author) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
@@ -71,6 +75,7 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public CommentResponse updateComment(Integer adId, Integer commentId, CreateOrUpdateCommentRequest request, User author) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
