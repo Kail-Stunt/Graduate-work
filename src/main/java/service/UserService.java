@@ -1,5 +1,6 @@
 package service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,7 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    @PreAuthorize("permitAll()")
     public UserResponse register(RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
@@ -49,11 +51,13 @@ public class UserService {
         return userMapper.toResponse(saved);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public UserResponse getUser() {
         User currentUser = getCurrentUser();
         return userMapper.toResponse(currentUser);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public UserResponse updateUser(UpdateUserRequest request) {
         User currentUser = getCurrentUser();
 
@@ -71,12 +75,14 @@ public class UserService {
         return userMapper.toResponse(saved);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public void updateUserImage(String imagePath) {
         User currentUser = getCurrentUser();
         currentUser.setImage(imagePath);
         userRepository.save(currentUser);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public void setPassword(NewPasswordRequest request) {
         User currentUser = getCurrentUser();
 
@@ -88,10 +94,12 @@ public class UserService {
         userRepository.save(currentUser);
     }
 
+    @PreAuthorize("permitAll()")
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();

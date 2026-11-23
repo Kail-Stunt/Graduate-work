@@ -1,4 +1,3 @@
-
 package controller;
 
 import jakarta.validation.Valid;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import dto.request.LoginRequest;
 import dto.response.UserResponse;
 import service.UserService;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/login")
