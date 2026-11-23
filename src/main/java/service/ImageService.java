@@ -1,11 +1,13 @@
-
 package service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,25 +62,31 @@ public class ImageService {
         String fileName = UUID.randomUUID() + extension;
         Path targetLocation = fileStorageLocation.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation);
-        return "/images/" + fileName;
+        return fileName;
     }
 
-    public byte[] getImage(String imagePath) throws IOException {
-        String fileName = imagePath.substring("/images/".length());
-        Path filePath = fileStorageLocation.resolve(fileName).normalize();
-        return Files.readAllBytes(filePath);
+    public Resource getResource(String imageName) {
+        try {
+            Path filePath = fileStorageLocation.resolve(imageName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Could not read image: " + imageName, e);
+        }
+        return null;
     }
 
-    public void deleteImage(String imagePath) {
-        if (imagePath == null || imagePath.isBlank()) {
+    public void deleteImage(String imageName) {
+        if (imageName == null || imageName.isBlank()) {
             return;
         }
         try {
-            String fileName = imagePath.substring("/images/".length());
-            Path filePath = fileStorageLocation.resolve(fileName).normalize();
+            Path filePath = fileStorageLocation.resolve(imageName).normalize();
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Could not delete image: " + imagePath, e);
+            throw new RuntimeException("Could not delete image: " + imageName, e);
         }
     }
 }
